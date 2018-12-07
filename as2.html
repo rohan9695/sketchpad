@@ -1,0 +1,227 @@
+<html>
+<head>
+<title>Sketchpad</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+#sketchpad{ width: 100%; height: 500px; border:1px solid #000000; }
+#leftside{ height:90%; width:100%;}
+
+#sketchpadapp {
+   
+   -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    padding: 1%;
+    display:grid;;
+    grid-template-areas: "item1 .";
+}
+.leftside {
+	grid-area: item1
+     /*float:left;*/
+    
+    padding:10px;
+    border-radius:4px;
+}
+.rightside {
+}
+#sketchpad {
+    
+    border:2px solid #888;
+    border-radius:4px;
+    position:relative; 
+}
+#clearbutton {
+    font-size: 15px;
+    padding: 10px;
+    -webkit-appearance: none;
+    background: #eee;
+    border: 1px solid #888;
+}
+@media screen and (max-width: 500px)
+{
+   #sketchpadapp {grid-template-areas: 'item1'
+										'.';
+					grid-gap: 0px;
+											}
+}
+</style>
+</head>
+
+<body onload="init()">
+    <div id="sketchpadapp">
+        <div class="leftside">
+             
+             <input type="submit" value="Clear" id="clearbutton" onclick="clearCanvas(canvas,ctx);">
+                
+                <div id="colorDiv" >
+                    <input type="color" id="color" name="color" id="drawingColor"/><label for="drawingColor">Pick A Color</label>
+                </div>
+                
+        </div>
+        <div class="rightside">
+            <canvas id="sketchpad" >
+            </canvas>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    var canvas,ctx;
+    var mouseX,mouseY,mouseDown=0;
+    var touchX,touchY;
+    var lastX,lastY=-1;
+
+    
+    function drawLine(ctx,x,y,size)
+        {
+        
+       	var color=document.getElementById("color").value;
+
+        if (lastX==-1) {
+            lastX=x;
+        lastY=y;
+        }
+
+        
+        r=0; g=100; b=50; a=255;
+        
+        ctx.strokeStyle = color;
+       /* var color = getElementById('drawingColor').value;
+        ctx.fillStyle = color;*/
+
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(lastX,lastY);
+        ctx.lineTo(x,y);
+        for(var i = 1; i < 2; i++){
+            ctx.lineWidth = 2;
+        }
+        ctx.stroke();
+        ctx.closePath();
+        ctx.fill();
+        r+=2;
+        if (r>360) 
+         r=0;
+    
+    lastX=x;
+    lastY=y;
+    } 
+
+    function clearCanvas(canvas,ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+   
+    function sketchpad_mouseDown() {
+        mouseDown=1;
+        drawLine(ctx,mouseX,mouseY,12);
+    }
+
+    function sketchpad_mouseUp() {
+        mouseDown=0;
+
+       
+        lastX=-1;
+        lastY=-1;
+    }
+
+ 
+    function sketchpad_mouseMove(e) { 
+        
+        getMousePos(e);
+
+    
+        if (mouseDown==1) {
+            drawLine(ctx,mouseX,mouseY,12);
+        }
+    }
+
+
+    function getMousePos(e) {
+        if (!e)
+            var e = event;
+
+        if (e.offsetX) {
+            mouseX = e.offsetX;
+            mouseY = e.offsetY;
+        }
+        else if (e.layerX) {
+            mouseX = e.layerX;
+            mouseY = e.layerY;
+        }
+     }
+
+  
+    function sketchpad_touchStart() {
+      
+        getTouchPos();
+
+        drawLine(ctx,touchX,touchY,12);
+
+      
+        event.preventDefault();
+    }
+
+    function sketchpad_touchEnd() {
+        
+        lastX=-1;
+        lastY=-1;
+    }
+
+
+    function sketchpad_touchMove(e) { 
+  
+        getTouchPos(e);
+
+   
+        drawLine(ctx,touchX,touchY,12); 
+
+       
+        event.preventDefault();
+    }
+
+
+    function getTouchPos(e) {
+        if (!e)
+            var e = event;
+
+        if(e.touches) {
+            if (e.touches.length == 1) { 
+                var touch = e.touches[0]; 
+                touchX=touch.pageX-touch.target.offsetLeft;
+                touchY=touch.pageY-touch.target.offsetTop;
+            }
+        }
+    }
+
+
+ 
+    function init() {
+  
+        canvas = document.getElementById('sketchpad');
+
+       
+        if (canvas.getContext)
+            ctx = canvas.getContext('2d');
+
+        if (ctx) {
+           
+            canvas.addEventListener('mousedown', sketchpad_mouseDown, false);
+            canvas.addEventListener('mousemove', sketchpad_mouseMove, false);
+            window.addEventListener('mouseup', sketchpad_mouseUp, false);
+
+            canvas.addEventListener('touchstart', sketchpad_touchStart, false);
+            canvas.addEventListener('touchend', sketchpad_touchEnd, false);
+            canvas.addEventListener('touchmove', sketchpad_touchMove, false);
+        }
+    }
+</script>
+
+
+</body>
+</html>
+
